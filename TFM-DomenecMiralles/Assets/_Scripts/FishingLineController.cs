@@ -13,6 +13,8 @@ public class FishingLineController : MonoBehaviour
     [SerializeField]
     [Tooltip("Distance needed from the last particle of the line to the bobber for it to deatach from the water. More distance more force needed.")]
     private float unstickDistance = 0.01f;
+    [SerializeField]
+    private float customGravity = -9.81f;
 
     [Header("Transforms")]
     [SerializeField]
@@ -82,7 +84,7 @@ public class FishingLineController : MonoBehaviour
 
             Vector3 temp = particles[i].position;
             Vector3 velocity = particles[i].position - particles[i].oldPosition;
-            Vector3 gravity = Physics.gravity;
+            Vector3 gravity = new Vector3(0, customGravity, 0);
 
             particles[i].position += velocity + gravity * dt * dt;
             particles[i].oldPosition = temp;
