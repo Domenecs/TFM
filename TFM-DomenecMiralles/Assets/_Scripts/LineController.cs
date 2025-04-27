@@ -2,30 +2,33 @@ using UnityEngine;
 
 public class LineController : MonoBehaviour
 {
+
     [Header("Line Settings")]
-    [SerializeField] private int segmentCount = 20; // Represents number of segments
-    [SerializeField] private float segmentLength = 0.1f;
-    [SerializeField] private int constraintIterations = 5;
-    [SerializeField] private float customGravity = -9.81f;
+    [SerializeField]
+    private int segmentCount = 20;
+    [SerializeField]
+    private float segmentLength = 0.1f;
+    [SerializeField]
+    private int constraintIterations = 5;
+
+    [Tooltip("Used to make the end feel heavier")]
+    [SerializeField]
+    private float customGravity = -9.81f;
 
     [Header("Transforms")]
-    [SerializeField] private Transform lineStart;
-    [SerializeField] private Transform lineEnd;
+    [SerializeField]
+    private Transform lineStart;
+    [SerializeField]
+    private Transform lineEnd; 
 
     [Header("Visuals")]
-    [SerializeField] private LineRenderer lineRenderer;
-    [SerializeField] private MeshRenderer hookMesh;
-    
-
+    [SerializeField]
+    private LineRenderer lineRenderer;
 
     private LineParticle[] particles;
 
-    private struct LineParticle
-    {
-        public Vector3 position;
-        public Vector3 oldPosition;
-        public Vector3 acceleration;
-    }
+
+
 
     void Start()
     {
@@ -34,35 +37,42 @@ public class LineController : MonoBehaviour
 
     void FixedUpdate()
     {
-        float dt = Mathf.Min(Time.fixedDeltaTime, 0.05f); // Prevent instability on large deltaTime
-        SimulateVerlet(dt);
+        SimulateVerlet(Time.fixedDeltaTime);
         ApplyConstraints();
     }
 
     void LateUpdate()
     {
+        UpdateLineEndPosition();
         DrawLine();
+    }
+
+    // Struct to store the particles that compose the line renderer data
+    private struct LineParticle
+    {
+        public Vector3 position;
+        public Vector3 oldPosition;
+        public Vector3 acceleration;
     }
 
     private void InitializeLine()
     {
-        // FIXED: +1 particle because segmentCount defines the number of *segments*, not particles
-        particles = new LineParticle[segmentCount + 1];
-
+        particles = new LineParticle[segmentCount];
         Vector3 direction = (lineEnd.position - lineStart.position).normalized;
 
-        for (int i = 0; i < particles.Length; i++) // FIXED: loop through all particles
+        for (int i = 0; i < segmentCount; i++)
         {
-            Vector3 pos = lineStart.position + direction * (segmentLength * i);
+            Vector3 pos = lineStart.position + direction * (segmentLength * i); 
             particles[i].position = pos;
             particles[i].oldPosition = pos;
             particles[i].acceleration = Vector3.zero;
         }
     }
 
+
     private void SimulateVerlet(float dt)
     {
-        for (int i = 1; i < particles.Length - 1; i++) // Keep first and last particles fixed
+        for (int i = 1; i < segmentCount; i++)
         {
             Vector3 temp = particles[i].position;
             Vector3 velocity = particles[i].position - particles[i].oldPosition;
@@ -72,10 +82,10 @@ public class LineController : MonoBehaviour
             particles[i].oldPosition = temp;
         }
 
-        // Fix anchor positions
+        // Only re-anchor the first particle
         particles[0].position = lineStart.position;
-        particles[particles.Length - 1].position = lineEnd.position;
     }
+
 
     private void ApplyConstraints()
     {
@@ -89,42 +99,51 @@ public class LineController : MonoBehaviour
                 Vector3 deltaVec = p2.position - p1.position;
                 float currentDist = deltaVec.magnitude;
 
-                if (currentDist == 0f) continue;
+                if (currentDist == 0f)
+                    continue;
 
                 float diff = (currentDist - segmentLength) / currentDist;
                 Vector3 offset = deltaVec * 0.5f * diff;
 
-                // FIXED: Apply half of the correction to both ends, unless they’re anchored
+                // Move particles unless they are locked
                 if (i != 0)
                     particles[i].position += offset;
-                if (i + 1 != particles.Length - 1)
-                    particles[i + 1].position -= offset;
+
+                particles[i + 1].position -= offset;
             }
 
-            // Re-anchor ends
+            // Always re-anchor the first point
             particles[0].position = lineStart.position;
-            particles[particles.Length - 1].position = lineEnd.position;
         }
     }
+
+
+
+
+
+    private void UpdateLineEndPosition()
+    {
+        if (lineEnd == null) return;
+
+
+        // Set bobber position
+        lineEnd.position = particles[segmentCount - 1].position;
+        lineEnd.up = Vector3.up;
+
+    }
+
+
 
     private void DrawLine()
     {
         if (lineRenderer != null)
         {
-            // FIXED: lineRenderer needs segmentCount + 1 points
-            lineRenderer.positionCount = particles.Length;
-            for (int i = 0; i < particles.Length; i++)
+            lineRenderer.positionCount = segmentCount;
+            for (int i = 0; i < segmentCount; i++)
             {
                 lineRenderer.SetPosition(i, particles[i].position);
             }
         }
-    }
-
-
-    public void ToggleVisibility()
-    {
-        lineRenderer.enabled = !lineRenderer.enabled;   
-        hookMesh.enabled = !hookMesh.enabled;
     }
 }
 

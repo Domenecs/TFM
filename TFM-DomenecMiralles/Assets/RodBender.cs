@@ -1,4 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Unity.XR.PXR;
 using UnityEngine;
 
 public class RodBender : MonoBehaviour
@@ -7,25 +10,46 @@ public class RodBender : MonoBehaviour
     [Tooltip("Reference the shader material used to bend the end portion of the rod.")]
     private Material rodMaterial;
 
-    private void Start()
+    // 0 left , 1 right
+    private int selectHandId = 1;
+    private int fishSizeFrequency = 0;
+
+    //Readonly
+    public bool IsFishHooked { get; private set; }
+
+    private Dictionary<string, int> fishSizesFrequencies = new Dictionary<string, int>()
     {
+        { "S", 200 },
+        { "M", 200},
+        { "L", 200},
+        { "XL", 200},
+        { "XXL", 200},
+    };
 
-        float randomStrength = Random.Range(0.5f, 1f);
-        float randomDuration = Random.Range(0.07f, 0.12f);
-        StartCoroutine(FishBite(randomStrength, randomDuration, 10, 1f));
 
+
+
+    //Used to set which hand is holding to cane to send the haptic feedback.
+    public void SetSelectedHand(int id)
+    {
+        selectHandId = id;
     }
 
 
 
-    public IEnumerator FishBite(float bendAmount = 0.5f, float duration = 0.5f, int numCycles = 1, float delayBetweenBites = 1f,
-        float hapticAmplitude = 0.5f, float frequency = 500f, float msDuration = 100)
+
+    private IEnumerator FishBite(float bendAmount = 0.5f, float duration = 0.5f, int numCycles = 1, float delayBetweenBites = 1f,
+        float hapticAmplitude = 0.5f, int frequency = 500)
     {
         float halfDuration = duration / 2f;
         float timer;
         for (int i = 0; i < numCycles; i++)
         {
 
+            // Haptic feedback section
+            var vibrateType = (selectHandId == 0) ? PXR_Input.VibrateType.LeftController : PXR_Input.VibrateType.RightController;
+            PXR_Input.SendHapticImpulse(vibrateType, hapticAmplitude, (int)duration, frequency);
+            //Rod Bending section
             timer = 0f;
             // Bend IN
             while (timer < halfDuration)
@@ -55,42 +79,133 @@ public class RodBender : MonoBehaviour
     }
 
 
+
+
+
     public IEnumerator FishingSequence(int sequence)
     {
 
+
+
         switch (sequence)
         {
-            //1 quick stroke
+            // 1 to 2 strokes, 0.1- 0.3 amplitude, 100ms, to 200ms each stroke
             case 0:
                 {
-                    yield return StartCoroutine(FishBite(0.4f, 0.4f, 1, 1, 0.2f, 200, 100));
-                        yield break;
+                    Debug.Log("Entering case 0");
+                    //Generate the size of the fish. smaller having more chances than bigger ones.
+                    GenerateFishSize();
+                    float bendAmount = Random.Range(0.3f, 0.5f);
+                    float duration = Random.Range(0.1f, 0.3f);
+                    int nCycles = (int)Random.Range(1, 3);
+                    float delayBetweenBites = Random.Range(0.3f, 0.9f);
+                    //Haptic settings
+                    float amplitude = Random.Range(0.1f, 0.4f);
+
+                    yield return StartCoroutine(FishBite(bendAmount,
+                        duration,
+                        nCycles,
+                        delayBetweenBites,
+                        amplitude,
+                        fishSizeFrequency
+                        ));
+                    yield break;
                 }
+            // 2 to 3 strokes, 0.4 - 0.6 amplitude, 200-400 ms
             case 1:
                 {
-                    yield break; 
+                    Debug.Log("Entering case 1");
+                    float bendAmount = Random.Range(0.3f, 0.5f);
+                    float duration = Random.Range(0.2f, 0.5f);
+                    int nCycles = (int)Random.Range(2, 4);
+                    float delayBetweenBites = Random.Range(0.3f, 0.9f);
+                    //Haptic settings
+                    float amplitude = Random.Range(0.1f, 0.4f);
+
+                    yield return StartCoroutine(FishBite(bendAmount,
+                        duration,
+                        nCycles,
+                        delayBetweenBites,
+                        amplitude,
+                        fishSizeFrequency
+                        ));
+                    yield break;
                 }
+                // In this cane the fish can hook up. Is a dice is rolled to determine if it can be rolled.
             case 2:
                 {
+                    if(Random.Range(0, 101) < 80)
+                    {
+                        Debug.Log("Entering case 2");
+                        float bendAmount = Random.Range(0.3f, 0.5f);
+                        float duration = Random.Range(0.2f, 0.5f);
+                        int nCycles = (int)Random.Range(2, 4);
+                        float delayBetweenBites = Random.Range(0.3f, 0.9f);
+                        //Haptic settings
+                        float amplitude = Random.Range(0.1f, 0.4f);
+
+                        yield return StartCoroutine(FishBite(bendAmount,
+                            duration,
+                            nCycles,
+                            delayBetweenBites,
+                            amplitude,
+                            fishSizeFrequency
+                            ));
+                    }
+                    else
+                    {
+                        StartCoroutine(nameof(FishHooked));
+                    }
                     yield break; 
                 }
             case 3:
                 {
+                    Debug.Log("Entering case 3");
+                    if (Random.Range(0,101) < 50)
+                    {
+                        StartCoroutine(nameof(FishHooked));
+                    }
                     yield break; 
                 }
-
-
-
-
-
-
-
         }
-
-
-
-
 
     }
 
+
+    //Used when the fish has hooked into the hook.
+    private IEnumerator FishHooked()
+    {
+        IsFishHooked = true;
+        //Bend the cane.
+        rodMaterial.SetFloat("_PullStrength", 0.6f);
+        //Send Haptic Feedback.
+        float RandomActionTime = Random.Range(600, 801);
+        var vibrateType = (selectHandId == 0) ? PXR_Input.VibrateType.LeftController : PXR_Input.VibrateType.RightController;
+        PXR_Input.SendHapticImpulse(vibrateType, Random.Range(0.8f, 1f), (int)RandomActionTime, fishSizeFrequency);
+        yield return new WaitForSeconds(RandomActionTime);
+        IsFishHooked = false;
+
+        yield return null;
+        //Set a variable true I guess. so OnTigger exit works.
+    }
+
+
+    //Picks a random item in the dictionary to determine the fishFrequency. Maybe change later.
+    private void GenerateFishSize()
+    {
+        List<string> fishSizes = new List<string>(fishSizesFrequencies.Keys);
+        int randomIndex = Random.Range(0, fishSizes.Count);
+        string randomFish = fishSizes[randomIndex];
+        fishSizeFrequency = fishSizesFrequencies[randomFish];
+    }
+
+
+    public void StopCourutines()
+    {
+        StopAllCoroutines();
+    }
+
+
+
 }
+
