@@ -19,12 +19,13 @@ public class RodBender : MonoBehaviour
 
     private Dictionary<string, int> fishSizesFrequencies = new Dictionary<string, int>()
     {
-        { "S", 200 },
+        { "S", 250 },
         { "M", 200},
-        { "L", 200},
-        { "XL", 200},
-        { "XXL", 200},
+        { "L", 150},
+        { "XL", 100},
+        { "XXL", 50},
     };
+
 
 
 
@@ -41,14 +42,17 @@ public class RodBender : MonoBehaviour
     private IEnumerator FishBite(float bendAmount = 0.5f, float duration = 0.5f, int numCycles = 1, float delayBetweenBites = 1f,
         float hapticAmplitude = 0.5f, int frequency = 500)
     {
+        Debug.Log("called Fishbite");
         float halfDuration = duration / 2f;
         float timer;
+        int hapticDuration = (int)(halfDuration * 1000);
         for (int i = 0; i < numCycles; i++)
         {
 
             // Haptic feedback section
             var vibrateType = (selectHandId == 0) ? PXR_Input.VibrateType.LeftController : PXR_Input.VibrateType.RightController;
-            PXR_Input.SendHapticImpulse(vibrateType, hapticAmplitude, (int)duration, frequency);
+            PXR_Input.SendHapticImpulse(vibrateType, hapticAmplitude, hapticDuration, fishSizeFrequency);
+
             //Rod Bending section
             timer = 0f;
             // Bend IN
@@ -134,9 +138,10 @@ public class RodBender : MonoBehaviour
                 // In this cane the fish can hook up. Is a dice is rolled to determine if it can be rolled.
             case 2:
                 {
-                    if(Random.Range(0, 101) < 80)
+                    Debug.Log("Entering case 2");
+
+                    if (Random.Range(0, 101) < 80)
                     {
-                        Debug.Log("Entering case 2");
                         float bendAmount = Random.Range(0.3f, 0.5f);
                         float duration = Random.Range(0.2f, 0.5f);
                         int nCycles = (int)Random.Range(2, 4);
@@ -175,15 +180,17 @@ public class RodBender : MonoBehaviour
     //Used when the fish has hooked into the hook.
     private IEnumerator FishHooked()
     {
+        Debug.Log("The fish is on the hook");
         IsFishHooked = true;
         //Bend the cane.
         rodMaterial.SetFloat("_PullStrength", 0.6f);
         //Send Haptic Feedback.
-        float RandomActionTime = Random.Range(600, 801);
+        float RandomActionTime = Random.Range(600, 800);
         var vibrateType = (selectHandId == 0) ? PXR_Input.VibrateType.LeftController : PXR_Input.VibrateType.RightController;
         PXR_Input.SendHapticImpulse(vibrateType, Random.Range(0.8f, 1f), (int)RandomActionTime, fishSizeFrequency);
-        yield return new WaitForSeconds(RandomActionTime);
+        yield return new WaitForSeconds(RandomActionTime/1000);
         IsFishHooked = false;
+        Debug.Log("The fish is no longer on the hook");
 
         yield return null;
         //Set a variable true I guess. so OnTigger exit works.

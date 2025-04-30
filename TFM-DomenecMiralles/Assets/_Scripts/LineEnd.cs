@@ -3,8 +3,7 @@ using UnityEngine;
 
 public class LineEnd : MonoBehaviour
 {
-    [SerializeField]
-    private LineController refFishingController;
+
 
     [SerializeField]
     private RodBender refRodBender;
@@ -19,6 +18,7 @@ public class LineEnd : MonoBehaviour
     {
         if (other.CompareTag("Water"))
         {
+            Debug.Log("Detected the collision Poggers");
             elapsedTime = 0;
             iterationCount = 0;
             randomTime = Random.Range(5f, 20f); // Fix later depending on the lure used.
@@ -30,10 +30,13 @@ public class LineEnd : MonoBehaviour
     {
         if (other.CompareTag("Water"))
         {
-            if (elapsedTime >= randomTime)
+            elapsedTime += Time.deltaTime;
+           
+            if (elapsedTime >= randomTime && !refRodBender.IsFishHooked)
             {
+                Debug.Log("Calling RodBender");
                 elapsedTime = 0;
-                refRodBender.FishingSequence(iterationCount);
+                StartCoroutine(refRodBender.FishingSequence(iterationCount));
                 iterationCount++;
                 if (iterationCount > 3) iterationCount = 0;
                 randomTime = Random.Range(5f, 10f); 

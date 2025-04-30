@@ -5,12 +5,9 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/PrototypeScene.unity
     guid: a66a97d30e44f4a40a3db60f7d0c727a
-  - enabled: 1
-    path: Assets/Scenes/HapticFeedbackTesting.unity
-    guid: 79e70f0eb3237b842a41c2edc6e31846
   m_configObjects:
     Unity.XR.PXR.Settings: {fileID: 11400000, guid: ad95137ed09d2494d95337e36fe0fc90, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
