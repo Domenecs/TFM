@@ -14,6 +14,10 @@ public class LineEnd : MonoBehaviour
 
     private int iterationCount = 0;
 
+    [Tooltip("Prefabs of the fishes you that can be spawned into the hook")]
+    [SerializeField]
+    private GameObject[] fishPrefabs;
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Water"))
@@ -52,7 +56,12 @@ public class LineEnd : MonoBehaviour
             if (refRodBender.IsFishHooked)
             {
                 Debug.Log("you caught the fish");
-                //yay , you won!!
+                int randomIndex = Random.Range(0, fishPrefabs.Length);
+
+                Instantiate(fishPrefabs[randomIndex], transform.position, Quaternion.identity);
+
+
+
                 refRodBender.StopAllCoroutines();
             }
             else

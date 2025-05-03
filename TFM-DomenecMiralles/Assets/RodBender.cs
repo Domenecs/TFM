@@ -14,8 +14,13 @@ public class RodBender : MonoBehaviour
     private int selectHandId = 1;
     private int fishSizeFrequency = 0;
 
+    [SerializeField]
+    private GameObject lineStart;
+
+
     //Readonly
     public bool IsFishHooked { get; private set; }
+
 
     private Dictionary<string, int> fishSizesFrequencies = new Dictionary<string, int>()
     {
@@ -36,16 +41,28 @@ public class RodBender : MonoBehaviour
         selectHandId = id;
     }
 
+    public void Start()
+    {
+        rodMaterial.SetFloat("_PullStrength", 0f);
+
+    }
 
 
 
     private IEnumerator FishBite(float bendAmount = 0.5f, float duration = 0.5f, int numCycles = 1, float delayBetweenBites = 1f,
         float hapticAmplitude = 0.5f, int frequency = 500)
     {
-        Debug.Log("called Fishbite");
         float halfDuration = duration / 2f;
         float timer;
         int hapticDuration = (int)(halfDuration * 1000);
+
+
+        //TO move the line with the bending.
+        Vector3 offSet = new Vector3(0f, -bendAmount, 0f);  
+        Vector3 originalPosition = lineStart.transform.position;
+
+
+
         for (int i = 0; i < numCycles; i++)
         {
 
@@ -62,6 +79,13 @@ public class RodBender : MonoBehaviour
                 float t = timer / halfDuration;
                 float bend = Mathf.Lerp(0f, bendAmount, t);
                 rodMaterial.SetFloat("_PullStrength", bend);
+
+
+                //Move the line
+                Vector3 start = originalPosition;
+                Vector3 end = originalPosition + offSet;
+                lineStart.transform.position = Vector3.Lerp(start, end, t);
+
                 yield return null;
             }
 
@@ -75,6 +99,15 @@ public class RodBender : MonoBehaviour
                 float bend = Mathf.Lerp(bendAmount, 0f, t);
                 rodMaterial.SetFloat("_PullStrength", bend);
                 yield return null;
+
+
+                //Move the line                 
+                //Move the line
+                Vector3 start = originalPosition + offSet;
+                Vector3 end = originalPosition;
+                lineStart.transform.position = Vector3.Lerp(start, end, t);
+
+
             }
 
             rodMaterial.SetFloat("_PullStrength", 0f); // Reset at end of cycle
@@ -184,8 +217,14 @@ public class RodBender : MonoBehaviour
         IsFishHooked = true;
         //Bend the cane.
         rodMaterial.SetFloat("_PullStrength", 0.6f);
+        //Move the line
+        Vector3 offSet = new Vector3(0f, -0.6f, 0f);
+        lineStart.transform.position = lineStart.transform.position + offSet;
+
+
+
         //Send Haptic Feedback.
-        float RandomActionTime = Random.Range(600, 800);
+        float RandomActionTime = Random.Range(1000, 1500);
         var vibrateType = (selectHandId == 0) ? PXR_Input.VibrateType.LeftController : PXR_Input.VibrateType.RightController;
         PXR_Input.SendHapticImpulse(vibrateType, Random.Range(0.8f, 1f), (int)RandomActionTime, fishSizeFrequency);
         yield return new WaitForSeconds(RandomActionTime/1000);
