@@ -27,7 +27,9 @@ public class LineController : MonoBehaviour
 
     private LineParticle[] particles;
 
-
+    [SerializeField]
+    [Range(0, 1)]
+    private float velocityDamping = 0.5f; // Try something like 0.9 to 0.98
 
 
     void Start()
@@ -75,7 +77,7 @@ public class LineController : MonoBehaviour
         for (int i = 1; i < segmentCount; i++)
         {
             Vector3 temp = particles[i].position;
-            Vector3 velocity = particles[i].position - particles[i].oldPosition;
+            Vector3 velocity = (particles[i].position - particles[i].oldPosition) * velocityDamping;
             Vector3 gravity = new Vector3(0, customGravity, 0);
 
             particles[i].position += velocity + gravity * dt * dt;
