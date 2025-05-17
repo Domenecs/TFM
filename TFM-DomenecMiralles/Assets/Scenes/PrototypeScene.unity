@@ -671,7 +671,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6598815579406187037, guid: 18ddb545287c546e19cc77dc9fbb2189, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -926,6 +926,7 @@ MonoBehaviour:
   lineStart: {fileID: 228948833}
   lineEnd: {fileID: 1357888877}
   lineRenderer: {fileID: 998968595}
+  velocityDamping: 0.5
 --- !u!114 &998968597
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2140,6 +2141,7 @@ MonoBehaviour:
   lineStart: {fileID: 543450652070666113}
   lineEnd: {fileID: 2122535180}
   lineRenderer: {fileID: 1671316788}
+  velocityDamping: 0.5
 --- !u!114 &1671316791
 MonoBehaviour:
   m_ObjectHideFlags: 0
