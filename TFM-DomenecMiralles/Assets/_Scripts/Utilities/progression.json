@@ -1,0 +1,7 @@
+{
+    "fishingRods":{
+        "basicRod": true,
+        "spinningRod":false,
+        "proRod": false
+    }
+}

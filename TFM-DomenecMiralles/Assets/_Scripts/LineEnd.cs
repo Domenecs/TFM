@@ -7,10 +7,12 @@ public class LineEnd : MonoBehaviour
 
     [SerializeField]
     private RodBender refRodBender;
+    [SerializeField]
+    private SpinningRodManager refSpinningRodManager;
 
     private float elapsedTime;
     private float randomTime;
-
+    //TODO POLIMORFISMO DE ESTAS CLASES.
 
     private int iterationCount = 0;
 
@@ -20,9 +22,10 @@ public class LineEnd : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+
         if (other.CompareTag("Water"))
         {
-            Debug.Log("Detected the collision Poggers");
+            Debug.Log("The line end is on the water");
             elapsedTime = 0;
             iterationCount = 0;
             randomTime = Random.Range(5f, 20f); // Fix later depending on the lure used.
@@ -32,18 +35,36 @@ public class LineEnd : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
+        
+
         if (other.CompareTag("Water"))
         {
             elapsedTime += Time.deltaTime;
-           
-            if (elapsedTime >= randomTime && !refRodBender.IsFishHooked)
+
+            if (refRodBender != null)
             {
-                Debug.Log("Calling RodBender");
-                elapsedTime = 0;
-                StartCoroutine(refRodBender.FishingSequence(iterationCount));
-                iterationCount++;
-                if (iterationCount > 3) iterationCount = 0;
-                randomTime = Random.Range(5f, 10f); 
+                if (elapsedTime >= randomTime && !refRodBender.IsFishHooked)
+                {
+                    Debug.Log("Calling RodBender");
+                    elapsedTime = 0;
+                    StartCoroutine(refRodBender.FishingSequence(iterationCount));
+                    iterationCount++;
+                    if (iterationCount > 3) iterationCount = 0;
+                    randomTime = Random.Range(5f, 10f);
+                }
+            }
+            else if (refSpinningRodManager != null)
+            {
+                if (elapsedTime >= randomTime && !refSpinningRodManager.IsFishHooked)
+                {
+                    Debug.Log("Calling SpinningManager");
+                    elapsedTime = 0;
+                    StartCoroutine(refSpinningRodManager.FishingSequence(iterationCount));
+                    iterationCount++;
+                    if (iterationCount > 3) iterationCount = 0;
+                    randomTime = Random.Range(5f, 10f);
+                }
+
             }
         }
     }
@@ -53,22 +74,40 @@ public class LineEnd : MonoBehaviour
     {
         if (other.CompareTag("Water"))
         {
-            if (refRodBender.IsFishHooked)
+
+            if(refRodBender != null)
             {
-                Debug.Log("you caught the fish");
-                int randomIndex = Random.Range(0, fishPrefabs.Length);
+                if (refRodBender.IsFishHooked)
+                {
+                    Debug.Log("you caught the fish");
+                    int randomIndex = Random.Range(0, fishPrefabs.Length);
 
-                Instantiate(fishPrefabs[randomIndex], transform.position, Quaternion.identity);
-
-
-
-                refRodBender.StopAllCoroutines();
-            }
-            else
+                    Instantiate(fishPrefabs[randomIndex], transform.position, Quaternion.identity);
+                    refRodBender.StopAllCoroutines();
+                }
+                else
+                {
+                    Debug.Log("pulled to early");
+                    refRodBender.StopAllCoroutines();
+                }
+            }else if(refSpinningRodManager != null)
             {
-                Debug.Log("pulled to early");
-                refRodBender.StopAllCoroutines();
+                if (refSpinningRodManager.IsFishHooked)
+                {
+                    Debug.Log("you caught the fish");
+                    int randomIndex = Random.Range(0, fishPrefabs.Length);
+
+                    Instantiate(fishPrefabs[randomIndex], transform.position, Quaternion.identity);
+                    refSpinningRodManager.StopAllCoroutines();
+                }
+                else
+                {
+                    Debug.Log("pulled to early");
+                    refSpinningRodManager.StopAllCoroutines();
+                }
             }
+
+
         }
     }
 
