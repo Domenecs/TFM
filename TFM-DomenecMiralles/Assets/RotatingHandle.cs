@@ -7,77 +7,98 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 public class RotatingHandle : XRBaseInteractable
 {
     [SerializeField] private Transform handleTransform;
+    [SerializeField] private float rotationSpeed = 1.8f;
 
+    [SerializeField] private Transform rotatingPieceTransform;
+
+
+
+    [SerializeField] private Transform movingPieceTransform;
+    [SerializeField] private float verticalMovementAmplitude = 0.02f; //Desplazamiento total.
+    [SerializeField] private float verticalMovementFrequency = 1f; //Velocity of the cycle
     public UnityEvent<float> OnWheelRotated;
 
-    private float currentAngle = 0.0f;
+    private Vector3 previousDirection;
+    private float totalRotatedAngle = 0f;
+
+    [Header("Line handling")]
+    [SerializeField] private SpinningLineController refSpinningLineController;
+    [SerializeField] private float segmentLengthStep = 0.001f;
+    [SerializeField] private float angleThreshold = 5.0f; // puedes ajustar este valor
+
 
     protected override void OnSelectEntered(SelectEnterEventArgs args)
     {
         base.OnSelectEntered(args);
-        currentAngle = FindWheelAngle();
+
+        // Dirección inicial desde interactor al centro del objeto
+        Vector3 handPos = args.interactorObject.transform.position;
+        previousDirection = (handPos - transform.position).normalized;
+
+        Debug.Log("Grabbing the object");
     }
 
     protected override void OnSelectExited(SelectExitEventArgs args)
     {
         base.OnSelectExited(args);
-        currentAngle = FindWheelAngle();
     }
 
     public override void ProcessInteractable(XRInteractionUpdateOrder.UpdatePhase updatePhase)
     {
         base.ProcessInteractable(updatePhase);
 
-        if (updatePhase == XRInteractionUpdateOrder.UpdatePhase.Dynamic)
+        if (updatePhase == XRInteractionUpdateOrder.UpdatePhase.Dynamic && isSelected)
         {
-            if (isSelected)
-                RotateWheel();
+            RotateWheel();
         }
     }
 
     private void RotateWheel()
     {
-        // Convert that direction to an angle, then rotation
-        float totalAngle = FindWheelAngle();
+        if (interactorsSelecting.Count == 0)
+            return;
 
-        // Apply difference in angle to wheel
-        float angleDifference = currentAngle - totalAngle;
-        handleTransform.Rotate(transform.forward, -angleDifference, Space.World);
+        var interactor = interactorsSelecting[0];
+        Vector3 currentDirection = (interactor.transform.position - transform.position).normalized;
 
-        // Store angle for next process
-        currentAngle = totalAngle;
-        OnWheelRotated?.Invoke(angleDifference);
-    }
+        // Rotar alrededor del eje X local del handle
+        Vector3 rotationAxis = handleTransform.right;
 
-    private float FindWheelAngle()
-    {
-        float totalAngle = 0;
+        float angle = Vector3.SignedAngle(previousDirection, currentDirection, rotationAxis);
+        handleTransform.Rotate(rotationAxis, angle * rotationSpeed, Space.World);
 
-        // Combine directions of current interactors
-        foreach (IXRSelectInteractor interactor in interactorsSelecting)
+        //Incrementar la longitud de la línea.
+        if (refSpinningLineController != null && Mathf.Abs(angle) > angleThreshold)
         {
-            Vector2 direction = FindLocalPoint(interactor.transform.position);
-            totalAngle += ConvertToAngle(direction) * FindRotationSensitivity();
+            //Se esta girando hacia delante.
+            if (angle > 0f)
+            {
+                refSpinningLineController.ChangeLineLength(segmentLengthStep);
+            }
+            else if (angle < 0f)
+            {
+                refSpinningLineController.ChangeLineLength(-segmentLengthStep);
+            }
         }
 
-        return totalAngle;
-    }
 
-    private Vector2 FindLocalPoint(Vector3 position)
-    {
-        // Convert the hand positions to local, so we can find the angle easier
-        return transform.InverseTransformPoint(position).normalized;
-    }
 
-    private float ConvertToAngle(Vector2 direction)
-    {
-        // Use a consistent up direction to find the angle
-        return Vector2.SignedAngle(Vector2.up, direction);
-    }
+        //Rotar la pieza que se mueve
+        rotationAxis = rotatingPieceTransform.up;
+        rotatingPieceTransform.Rotate(rotationAxis, angle * rotationSpeed, Space.World);
 
-    private float FindRotationSensitivity()
-    {
-        // Use a smaller rotation sensitivity with two hands
-        return 1.0f / interactorsSelecting.Count;
+        //Mover la pieza arriba y abajo.
+        totalRotatedAngle += angle * rotationSpeed;
+        float yOffset = Mathf.Sin(totalRotatedAngle * verticalMovementFrequency * Mathf.Deg2Rad) * verticalMovementAmplitude;
+
+        // Posición original + offset
+        Vector3 localPos = movingPieceTransform.localPosition;
+        localPos.y = yOffset;
+        movingPieceTransform.localPosition = localPos;
+
+
+        previousDirection = currentDirection;
+        OnWheelRotated?.Invoke(angle);
+
     }
 }

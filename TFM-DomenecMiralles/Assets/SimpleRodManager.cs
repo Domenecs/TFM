@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using Unity.XR.PXR;
 using UnityEngine;
 
-public class SpinningRodManager: MonoBehaviour
+public class SimpleRodManager : MonoBehaviour
 {
 
     // 0 left , 1 right
@@ -15,7 +15,7 @@ public class SpinningRodManager: MonoBehaviour
     [SerializeField] private GameObject hookParent;
 
     [SerializeField]
-    Animator spinningRodAnimator;
+    Animator simpleRodAnimator;
 
     //Readonly
     public bool IsFishHooked { get; private set; }
@@ -38,20 +38,20 @@ public class SpinningRodManager: MonoBehaviour
     }
 
 
-    private IEnumerator FishBite( float duration = 0.5f,
-        float hapticAmplitude = 0.5f, int frequency = 500, string trigger ="")
+    private IEnumerator FishBite(float duration = 0.5f,
+        float hapticAmplitude = 0.5f, int frequency = 500, string trigger = "")
     {
         // Haptic feedback section
         int hapticDuration = (int)(duration * 1000);
         var vibrateType = (selectHandId == 0) ? PXR_Input.VibrateType.LeftController : PXR_Input.VibrateType.RightController;
-            PXR_Input.SendHapticImpulse(vibrateType, hapticAmplitude, hapticDuration, fishSizeFrequency);
+        PXR_Input.SendHapticImpulse(vibrateType, hapticAmplitude, hapticDuration, fishSizeFrequency);
 
-       spinningRodAnimator.SetTrigger(trigger);
+        simpleRodAnimator.SetTrigger(trigger);
 
 
         yield return new WaitForSeconds(duration);
-        spinningRodAnimator.SetTrigger("ResetAnimation");
-        
+        simpleRodAnimator.SetTrigger("ResetAnimation");
+
     }
 
 
@@ -68,7 +68,7 @@ public class SpinningRodManager: MonoBehaviour
                     Debug.Log("Entering case 0");
                     //Generate the size of the fish. smaller having more chances than bigger ones.
                     GenerateFishSize();
-                    float duration = Random.Range(0.5f, 1f);                   
+                    float duration = Random.Range(0.5f, 1f);
                     //Haptic settings
                     float amplitude = Random.Range(0.1f, 0.4f);
 
@@ -137,7 +137,7 @@ public class SpinningRodManager: MonoBehaviour
         Debug.Log("The fish is on the hook");
         IsFishHooked = true;
         //Bend the cane.
-        spinningRodAnimator.SetTrigger("FishHooked");
+        simpleRodAnimator.SetTrigger("FishHooked");
         //Move the line
         //Send Haptic Feedback.
         float RandomActionTime = Random.Range(2000, 3000);
@@ -145,7 +145,7 @@ public class SpinningRodManager: MonoBehaviour
         PXR_Input.SendHapticImpulse(vibrateType, Random.Range(0.8f, 1f), (int)RandomActionTime, fishSizeFrequency);
         yield return new WaitForSeconds(RandomActionTime / 1000);
         IsFishHooked = false;
-        spinningRodAnimator.SetTrigger("ResetAnimation");
+        simpleRodAnimator.SetTrigger("ResetAnimation");
         Debug.Log("The fish is no longer on the hook");
 
         yield return null;

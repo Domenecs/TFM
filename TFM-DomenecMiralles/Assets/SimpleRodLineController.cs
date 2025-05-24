@@ -1,12 +1,12 @@
 using System.Collections;
 using UnityEngine;
 
-public class SpinningLineController : MonoBehaviour
+public class SimpleRodLineController : MonoBehaviour
 {
 
     [Header("Line Settings")]
     [SerializeField]
-    private int segmentCount = 20;
+    private int segmentCount = 40;
     [SerializeField]
     private float segmentLength = 0.1f;
     [SerializeField]
@@ -20,7 +20,7 @@ public class SpinningLineController : MonoBehaviour
     [SerializeField]
     private Transform lineStart;
     [SerializeField]
-    private Transform lineEnd; 
+    private Transform lineEnd;
 
     [Header("Visuals")]
     [SerializeField]
@@ -40,43 +40,9 @@ public class SpinningLineController : MonoBehaviour
     [SerializeField] private GameObject hookGameObject;
     [SerializeField] private int hookStartIndex = 10;
 
-    [Header("ObligatoryLineRendererPoints")]
-    [SerializeField]
-    private Transform[] guidePoints;
-
-    [Header("ThrowingMechanic")]
-    [SerializeField] private float castExtendDuration = 1.2f;
-    [SerializeField] private float totalExtendAmount = 1.5f; // Total a extender en ese tiempo
-
-
-
     void Start()
     {
         InitializeLine();
-    }
-
-    public void ReleaseCasting(Vector3 force)
-    {
-        int last = particles.Length - 1;
-        particles[last].oldPosition = particles[last].position - force * Time.fixedDeltaTime;
-
-        //Gradually extend the line.
-        StartCoroutine(GraduallyExtendLine());
-    }
-
-    public IEnumerator GraduallyExtendLine()
-    {
-        float elapsed = 0f;
-        float interval = 0.02f; // frecuencia de los pasos
-        int steps = Mathf.CeilToInt(castExtendDuration / interval);
-        float stepAmount = totalExtendAmount / steps;
-
-        while (elapsed < castExtendDuration)
-        {
-            ChangeLineLength(stepAmount);
-            elapsed += interval;
-            yield return new WaitForSeconds(interval);
-        }
     }
 
     void FixedUpdate()
@@ -114,10 +80,10 @@ public class SpinningLineController : MonoBehaviour
 
     public void ChangeLineLength(float amount)
     {
-        
+
         segmentLength += amount;
 
-        if(segmentLength < 0.005)
+        if (segmentLength < 0.005)
         {
             segmentLength = 0.005f;
         }
@@ -125,22 +91,11 @@ public class SpinningLineController : MonoBehaviour
     private void InitializeLine()
     {
         particles = new LineParticle[segmentCount];
+        Vector3 direction = (lineEnd.position - lineStart.position).normalized;
 
-        for (int i = 0; i < particles.Length; i++)
+        for (int i = 0; i < segmentCount; i++)
         {
-            Vector3 pos;
-            if (i < guidePoints.Length)
-            {
-                //Anchor fixed points.
-                pos = guidePoints[i].position;
-            }
-            else
-            {
-                //Non fixed points
-                Vector3 dir = (lineEnd.position - guidePoints[guidePoints.Length - 1].position).normalized;
-                pos = guidePoints[guidePoints.Length - 1].position + dir * segmentLength * (i - guidePoints.Length);
-            }
-
+            Vector3 pos = lineStart.position + direction * (segmentLength * i);
             particles[i].position = pos;
             particles[i].oldPosition = pos;
             particles[i].acceleration = Vector3.zero;
@@ -151,15 +106,8 @@ public class SpinningLineController : MonoBehaviour
 
     private void SimulateVerlet(float dt)
     {
-        for (int i = guidePoints.Length; i < segmentCount; i++)
+        for (int i = 1; i < segmentCount; i++)
         {
-            // Si está en agua y esta es una de las últimas N partículas, mantener fijas
-            if (isInWater && i >= segmentCount - 10)
-            {
-                // Fijar posición como si fuera un guide point
-                continue;
-            }
-
             Vector3 temp = particles[i].position;
             Vector3 velocity = (particles[i].position - particles[i].oldPosition) * velocityDamping;
             Vector3 gravity = new Vector3(0, customGravity, 0);
@@ -168,12 +116,9 @@ public class SpinningLineController : MonoBehaviour
             particles[i].oldPosition = temp;
         }
 
-        // Reanclar puntos fijos (guide points)
-        for (int i = 0; i < guidePoints.Length; i++)
-        {
-            particles[i].position = guidePoints[i].position;
-        }
-
+        // Only re-anchor the first particle
+        particles[0].position = lineStart.position;
+    
         // Fijar posición de partículas flotando en el agua
         if (isInWater)
         {
@@ -206,21 +151,14 @@ public class SpinningLineController : MonoBehaviour
                 float diff = (currentDist - segmentLength) / currentDist;
                 Vector3 offset = deltaVec * 0.5f * diff;
 
-                // Solo ajustar si no son guías fijas
-                if (i >= guidePoints.Length)
+                if (i != 0) 
                     particles[i].position += offset;
 
-                if (i + 1 >= guidePoints.Length)
-                    particles[i + 1].position -= offset;
-            }
-
-            // Re-anclar puntos fijos cada iteración
-            for (int i = 0; i < guidePoints.Length; i++)
-            {
-                particles[i].position = guidePoints[i].position;
+                particles[i + 1].position -= offset;
             }
         }
     }
+
 
 
 

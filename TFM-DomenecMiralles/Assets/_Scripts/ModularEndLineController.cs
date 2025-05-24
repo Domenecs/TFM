@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class LineController : MonoBehaviour
+public class ModularEndLineController : MonoBehaviour
 {
 
     [Header("Line Settings")]
@@ -29,7 +29,11 @@ public class LineController : MonoBehaviour
 
     [SerializeField]
     [Range(0, 1)]
-    private float velocityDamping = 0.5f; // Try something like 0.9 to 0.98
+    private float velocityDamping = 0.98f; // Try something like 0.9 to 0.98
+
+    [SerializeField]
+    private SpinningLineController rodLineController;
+    
 
 
     void Start()
@@ -47,6 +51,16 @@ public class LineController : MonoBehaviour
     {
         UpdateLineEndPosition();
         DrawLine();
+    }
+
+
+    public void ReleaseCasting(Vector3 force)
+    {
+        int last = particles.Length - 1;
+        particles[last].oldPosition = particles[last].position - force * Time.fixedDeltaTime;
+
+        //Gradually extend the line.
+        rodLineController.StartCoroutine(rodLineController.GraduallyExtendLine());
     }
 
     // Struct to store the particles that compose the line renderer data
