@@ -36,9 +36,6 @@ public class SpinningLineController : MonoBehaviour
     [Range(0, 1)]
     private float velocityDamping = 0.98f;
 
-    [Header("Attachments")]
-    [SerializeField] private GameObject hookGameObject;
-    [SerializeField] private int hookStartIndex = 10;
 
     [Header("ObligatoryLineRendererPoints")]
     [SerializeField]
@@ -248,6 +245,7 @@ public class SpinningLineController : MonoBehaviour
             for (int i = 0; i < segmentCount; i++)
             {
                 lineRenderer.SetPosition(i, particles[i].position);
+
             }
         }
     }

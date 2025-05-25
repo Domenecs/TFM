@@ -16,9 +16,21 @@ public class RodTipPullDetector : MonoBehaviour
 
     private void Update()
     {
-        if (!isDetecting && spinningRodManager.IsFishHooked)
+
+        if (!isDetecting && spinningRodManager != null)
         {
-            StartDetecting();
+            if (spinningRodManager.IsFishHooked)
+            {
+                StartDetecting();
+            }
+        }
+
+        if (!isDetecting && simpleRodManager != null)
+        {
+            if (simpleRodManager.IsFishHooked)
+            {
+                StartDetecting();
+            }
         }
 
         if (!isDetecting) return;

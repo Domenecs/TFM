@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class SimpleRodLineController : MonoBehaviour
@@ -37,8 +38,11 @@ public class SimpleRodLineController : MonoBehaviour
     private float velocityDamping = 0.98f;
 
     [Header("Attachments")]
-    [SerializeField] private GameObject hookGameObject;
-    [SerializeField] private int hookStartIndex = 10;
+    [SerializeField] private GameObject enganxeGameObject;
+    [SerializeField] private int enganxeIndex = 10;
+    [SerializeField] private GameObject lineHider;
+
+
 
     void Start()
     {
@@ -178,6 +182,7 @@ public class SimpleRodLineController : MonoBehaviour
 
 
 
+
     private void DrawLine()
     {
         if (lineRenderer != null)
@@ -186,6 +191,22 @@ public class SimpleRodLineController : MonoBehaviour
             for (int i = 0; i < segmentCount; i++)
             {
                 lineRenderer.SetPosition(i, particles[i].position);
+                
+                if(i == enganxeIndex)
+                {
+                    enganxeGameObject.transform.SetPositionAndRotation(
+                        particles[i].position,
+                        Quaternion.LookRotation((particles[i + 1].position - particles[i].position).normalized, Vector3.up)
+                    );
+                }
+
+                if(i == segmentCount - 1)
+                {
+                    lineHider.transform.SetPositionAndRotation(
+             particles[i].position,
+                 Quaternion.LookRotation((particles[i-1].position - particles[i].position).normalized, Vector3.up)
+);
+                }
             }
         }
     }
@@ -197,9 +218,12 @@ public class SimpleRodLineController : MonoBehaviour
         for (int i = 0; i < particles.Length; i++)
         {
             particles[i].oldPosition = particles[i].position;
+       
         }
     }
-
+    
 }
+
+
 
 
