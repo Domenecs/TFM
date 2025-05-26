@@ -54,9 +54,20 @@ public class RodTipPullDetector : MonoBehaviour
             lastPosition = currentPosition;
         }
 
-        if (!spinningRodManager.IsFishHooked)
+        if (spinningRodManager != null)
         {
-            StopDetecting();
+            if(!spinningRodManager.IsFishHooked)
+            {
+                StopDetecting();
+            }
+        }
+
+        if (simpleRodManager != null)
+        {
+            if (!simpleRodManager.IsFishHooked)
+            {
+                StopDetecting();
+            }
         }
     }
 
@@ -65,13 +76,11 @@ public class RodTipPullDetector : MonoBehaviour
         isDetecting = true;
         lastPosition = transform.position;
         timer = 0f;
-        Debug.Log("Detección de tirón activada");
     }
 
     private void StopDetecting()
     {
         isDetecting = false;
         timer = 0f;
-        Debug.Log("Detección de tirón desactivada");
     }
 }
