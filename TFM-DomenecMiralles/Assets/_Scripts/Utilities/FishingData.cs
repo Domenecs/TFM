@@ -85,12 +85,6 @@ public static class FishingData
         { FishSize.XXL, 50 },
     };
 
-    public static Dictionary<int, int> SequenceChances = new Dictionary<int, int>()
-    {
-        { 0, 100 },  // siempre pasa
-        { 1, 100 },  // siempre pasa
-        { 2, 80 },   // 80% chance para el paso 2
-        { 3, 50 }    // 50% chance para el paso 3
-    };
+
 
 }

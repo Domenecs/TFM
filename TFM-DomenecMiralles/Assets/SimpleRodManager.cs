@@ -165,7 +165,6 @@ public class SimpleRodManager : MonoBehaviour
             if (rand <= acumulative)
                 generatedFishSize = key.Key;
         }
-        //Per si decás.
     }
 
 
@@ -209,8 +208,22 @@ public class SimpleRodManager : MonoBehaviour
        
         }
         GameObject hookParent = accesoriesManager.GetHookGameObject();
-        Instantiate(selectedFish.prefab, hookParent.transform);
-        IsFishHooked = false;
+        GameObject instiantatedFish = Instantiate(selectedFish.prefab, hookParent.transform);
+        instiantatedFish.transform.localScale *= FishingData.ScaleMultipliers[generatedFishSize];
+
+
+        //Asign its value
+        FishFunctions refFishFunction = instiantatedFish.GetComponent<FishFunctions>();
+        if(refFishFunction == null)
+        {
+            Debug.LogWarning("Couldn't find the fishFunction script");
+        }
+        else
+        {
+            refFishFunction.SetFishValue((int)(selectedFish.fishValue * instiantatedFish.transform.localScale.x));
+        }
+
+
         simpleRodAnimator.SetTrigger("ResetAnimation");
 
     }

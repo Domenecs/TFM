@@ -1,5 +1,7 @@
 
 
+using JetBrains.Annotations;
+
 [System.Serializable]
 
 public class Unlockables
@@ -8,19 +10,51 @@ public class Unlockables
     public Baits baits;
     public Hooks hooks;
     public int currency;
-
+    public Buckets buckets;
+    public Locations locations;
 
     public Unlockables()
     {
         fishingRods = new FishingRods();
         baits = new Baits();   
         hooks = new Hooks();
+        buckets = new Buckets();
+        locations = new Locations();
         currency = 0;
     }
 }
 
 
+[System.Serializable]
+public class Locations
+{
+    public bool rockSea;
+    public bool river;
+    public bool deepSea;
 
+
+    public Locations()
+    {
+        rockSea = true;
+        river = false;
+        deepSea = false;
+    }
+}
+
+
+[System.Serializable]
+public class Buckets
+{
+    public bool smallBucket;
+    public bool mediumBucket;
+    public bool largeBucket;    
+    public Buckets()
+    {
+        smallBucket = true;
+        mediumBucket = false;
+        largeBucket = false;
+    }
+}
 
 [System.Serializable]
 public class FishingRods
@@ -40,7 +74,6 @@ public class FishingRods
     }
     
 }
-
 
 [System.Serializable]
 public class Baits
