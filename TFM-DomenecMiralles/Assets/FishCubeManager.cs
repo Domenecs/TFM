@@ -13,13 +13,17 @@ public class FishCubeManager : MonoBehaviour
     [SerializeField] private int fishCapacity;
     private int _bucketScore;
 
+    private void Start()
+    {
+        UpdateUI();
+    }
 
     // ------------ COLLISION FUNCTIONS -----------//
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Fish"))
         {
-            FishFunctions refScript = other.gameObject.GetComponent<FishFunctions>();
+            FishFunctions refScript = other.GetComponentInParent<FishFunctions>();
             if (refScript != null)
             {
                 if(fishCapacity > 0)
@@ -42,7 +46,7 @@ public class FishCubeManager : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Fish"))
         {
-            FishFunctions refScript = other.gameObject.GetComponent<FishFunctions>();
+            FishFunctions refScript = other.GetComponentInParent<FishFunctions>();
             if (refScript != null)
             {
                     fishCapacity++;
@@ -66,12 +70,10 @@ public class FishCubeManager : MonoBehaviour
     }
 
 
-
-    public void FinishSession()
+    public int GetBucketValue()
     {
-        Unlockables unlocks =  LoadSaveManager.Instance.LoadProgress();
-        unlocks.currency += _bucketScore;
-        LoadSaveManager.Instance.SaveProgress(unlocks);
-        SceneManager.LoadScene("Lobby");
+        return _bucketScore;
     }
+
+
 }
