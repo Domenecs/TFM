@@ -21,4 +21,6 @@ public class FishData : ScriptableObject
 
     public List<BaitProbability> baitChances;
 
+    public Vector3 offSet;
+
 }

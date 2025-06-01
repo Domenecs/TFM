@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using static FishingData;
 
 public class SpinningLineController : MonoBehaviour
 {
@@ -258,6 +260,12 @@ public class SpinningLineController : MonoBehaviour
         {
             particles[i].oldPosition = particles[i].position;
         }
+    }
+
+
+    public void ToggleLineEnd()
+    {
+        lineEnd.gameObject.SetActive(!lineEnd.gameObject.activeInHierarchy);
     }
 
 }

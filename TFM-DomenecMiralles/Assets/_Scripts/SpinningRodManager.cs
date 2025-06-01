@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.XR.PXR;
 using UnityEngine;
+using static FishingData;
 
 public class SpinningRodManager: MonoBehaviour
 {
@@ -11,11 +12,16 @@ public class SpinningRodManager: MonoBehaviour
     private int selectHandId = 1;
     private int fishSizeFrequency = 0;
 
-    [SerializeField] private List<GameObject> fishPrefabs;
-    [SerializeField] private GameObject hookParent;
 
     [SerializeField]
     Animator spinningRodAnimator;
+
+    [Header("FishData")]
+    [SerializeField] private List<FishData> allFishData;
+    [SerializeField] private GameObject hookParent;
+    private FishSize generatedFishSize;
+
+
 
     //Readonly
     public bool IsFishHooked { get; private set; }
@@ -60,6 +66,9 @@ public class SpinningRodManager: MonoBehaviour
 
     public IEnumerator FishingSequence(int sequence)
     {
+        FishingData.HookType currentHook = HookType.BigHook;
+        int hookChance = FishingData.HookChances[currentHook];
+
         switch (sequence)
         {
             // 1 to 2  light strokes, 0.1- 0.3 amplitude, 100ms, to 200ms each stroke
@@ -68,13 +77,13 @@ public class SpinningRodManager: MonoBehaviour
                     Debug.Log("Entering case 0");
                     //Generate the size of the fish. smaller having more chances than bigger ones.
                     GenerateFishSize();
-                    float duration = Random.Range(0.5f, 1f);                   
+                    float duration = Random.Range(0.5f, 1f);
                     //Haptic settings
                     float amplitude = Random.Range(0.1f, 0.4f);
 
                     yield return StartCoroutine(FishBite(duration,
                         amplitude,
-                        fishSizeFrequency,
+                        FishingData.Frequencies[generatedFishSize],
                         "LightStroke"
                         ));
                     yield break;
@@ -89,7 +98,7 @@ public class SpinningRodManager: MonoBehaviour
 
                     yield return StartCoroutine(FishBite(duration,
                         amplitude,
-                        fishSizeFrequency,
+                       FishingData.Frequencies[generatedFishSize],
                         "LightStroke"
                         ));
                     yield break;
@@ -99,7 +108,7 @@ public class SpinningRodManager: MonoBehaviour
                 {
                     Debug.Log("Entering case 2");
 
-                    if (Random.Range(0, 101) < 80)
+                    if (Random.Range(0, 101) < hookChance)
                     {
                         float duration = Random.Range(0.2f, 0.5f);
                         //Haptic settings
@@ -107,7 +116,7 @@ public class SpinningRodManager: MonoBehaviour
 
                         yield return StartCoroutine(FishBite(duration,
                             amplitude,
-                            fishSizeFrequency,
+                            FishingData.Frequencies[generatedFishSize],
                             "HardStroke"
                             ));
                     }
@@ -120,7 +129,7 @@ public class SpinningRodManager: MonoBehaviour
             case 3:
                 {
                     Debug.Log("Entering case 3");
-                    if (Random.Range(0, 101) < 50)
+                    if (Random.Range(0, 101) < hookChance)
                     {
                         StartCoroutine(nameof(FishHooked));
                     }
@@ -142,7 +151,7 @@ public class SpinningRodManager: MonoBehaviour
         //Send Haptic Feedback.
         float RandomActionTime = Random.Range(2000, 3000);
         var vibrateType = (selectHandId == 0) ? PXR_Input.VibrateType.LeftController : PXR_Input.VibrateType.RightController;
-        PXR_Input.SendHapticImpulse(vibrateType, Random.Range(0.8f, 1f), (int)RandomActionTime, fishSizeFrequency);
+        PXR_Input.SendHapticImpulse(vibrateType, Random.Range(0.8f, 1f), (int)RandomActionTime, FishingData.Frequencies[generatedFishSize]);
         yield return new WaitForSeconds(RandomActionTime / 1000);
         IsFishHooked = false;
         spinningRodAnimator.SetTrigger("ResetAnimation");
@@ -155,10 +164,17 @@ public class SpinningRodManager: MonoBehaviour
     //Picks a random item in the dictionary to determine the fishFrequency. Maybe change later.
     private void GenerateFishSize()
     {
-        List<string> fishSizes = new List<string>(fishSizesFrequencies.Keys);
-        int randomIndex = Random.Range(0, fishSizes.Count);
-        string randomFish = fishSizes[randomIndex];
-        fishSizeFrequency = fishSizesFrequencies[randomFish];
+        //% chances for the current rod.
+        var chances = RodSizeChances[RodType.Intermediate];
+        float rand = Random.Range(0f, 100f);
+        float acumulative = 0f;
+
+        foreach (var key in chances)
+        {
+            acumulative += key.Value;
+            if (rand <= acumulative)
+                generatedFishSize = key.Key;
+        }
     }
 
 
@@ -167,11 +183,59 @@ public class SpinningRodManager: MonoBehaviour
         Debug.Log("Got the fish!");
         StopAllCoroutines();
 
-        int index = Random.Range(0, fishPrefabs.Count);
-        Instantiate(fishPrefabs[index], hookParent.transform);
+        BaitType currentBait = BaitType.Jig;
+        //CReate a list of fishes with probability > 0
+        List<(FishData fish, float probability)> fishCandidates = new List<(FishData, float)>();
 
+        foreach (var fish in allFishData)
+        {
+            var baitProb = fish.baitChances.Find(b => b.baitType == currentBait);
+            if (baitProb != null && baitProb.probability > 0f)
+            {
+                fishCandidates.Add((fish, baitProb.probability));
+            }
+        }
+
+        if (fishCandidates.Count == 0)
+        {
+            Debug.LogWarning("No fish available for the current bait");
+            return;
+        }
+
+        float rand = Random.Range(0f, 100f);
+        float acumulative = 0f;
+        FishData selectedFish = fishCandidates[0].fish; // Just in case.
+
+
+        foreach (var fish in fishCandidates)
+        {
+            acumulative += fish.probability;
+            if (rand <= acumulative)
+            {
+                selectedFish = fish.fish;
+                break;
+            }
+
+        }
+        GameObject instiantatedFish = Instantiate(selectedFish.prefab, hookParent.transform);
+        instiantatedFish.transform.localScale *= FishingData.ScaleMultipliers[generatedFishSize];
+        instiantatedFish.transform.localRotation = Quaternion.Euler(180f, 0f, 0f);
+        instiantatedFish.transform.localPosition += Vector3.zero;
+        instiantatedFish.transform.localPosition += selectedFish.offSet;
+
+        //Asign its value
+        FishFunctions refFishFunction = instiantatedFish.GetComponentInParent<FishFunctions>();
+        if (refFishFunction == null)
+        {
+            Debug.LogWarning("Couldn't find the fishFunction script");
+        }
+        else
+        {
+            refFishFunction.SetFishValue((int)(selectedFish.fishValue * instiantatedFish.transform.localScale.x));
+        }
 
         IsFishHooked = false;
+        spinningRodAnimator.SetTrigger("ResetAnimation");
 
     }
 

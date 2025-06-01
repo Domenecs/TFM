@@ -65,6 +65,8 @@ public static class FishingData
                 { FishSize.XXL, 15f },
             }
         }
+
+
     };
 
     public static readonly Dictionary<FishSize, float> ScaleMultipliers = new()

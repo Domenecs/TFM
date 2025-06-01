@@ -15,7 +15,6 @@ public class LoadSaveManager : MonoBehaviour {
             Instance = this;
         }
         DontDestroyOnLoad(gameObject);
-        Debug.Log(Application.persistentDataPath);
     }
 
 

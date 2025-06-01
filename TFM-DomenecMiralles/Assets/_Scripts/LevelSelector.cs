@@ -27,7 +27,7 @@ public class LevelSelector : XRBaseInteractable
         LoadLocationData();
     }
 
-    private void LoadLocationData()
+    public void LoadLocationData()
     {
         Unlockables unlocks = LoadSaveManager.Instance.LoadProgress();
 

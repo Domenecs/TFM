@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7858720004109454978
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3577405652270608757}
+  - component: {fileID: 3624626993691774110}
+  - component: {fileID: 7534121079430175881}
+  m_Layer: 0
+  m_Name: AccesorryLoaders
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3577405652270608757
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7858720004109454978}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -4.2403536, y: -1.1747582, z: -6.701459}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3624626993691774110
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7858720004109454978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc36f14c94bcd0f40bf4b2f63f0e8e68, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  basicRodGO: {fileID: 0}
+  basicRodLineEnd: {fileID: 0}
+  betterRodGO: {fileID: 0}
+  betterRodLineEnd: {fileID: 0}
+  spinningRodGO: {fileID: 0}
+  spinningRodLineEnd: {fileID: 0}
+--- !u!114 &7534121079430175881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7858720004109454978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7c7220fc0831c141a3051fcce14cd31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  smallBucket: {fileID: 0}
+  mediumBucket: {fileID: 0}
+  largeBucket: {fileID: 0}

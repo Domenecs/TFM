@@ -1,7 +1,5 @@
 
 
-using JetBrains.Annotations;
-
 [System.Serializable]
 
 public class Unlockables
@@ -68,8 +66,8 @@ public class FishingRods
     public FishingRods()
     {
         basicRod = true;
-        betterRod = false;
-        spinningRod = false;
+        betterRod = true;
+        spinningRod = true;
         
     }
     
@@ -85,8 +83,8 @@ public class Baits
     public Baits()
     {
         gacha = true;
-        mondarina = false;
-        worm = false;
+        mondarina = true;
+        worm = true;
     }
 }
 

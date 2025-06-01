@@ -15,10 +15,6 @@ public class SpinningLineEnd : MonoBehaviour
 
     private int iterationCount = 0;
 
-    [Tooltip("Prefabs of the fishes you that can be spawned into the hook")]
-    [SerializeField]
-    private GameObject[] fishPrefabs;
-
     private void OnTriggerEnter(Collider other)
     {
 
@@ -30,11 +26,10 @@ public class SpinningLineEnd : MonoBehaviour
 
             elapsedTime = 0;
             iterationCount = 0;
-            randomTime = Random.Range(5f, 20f); // Fix later depending on the lure used.
+            randomTime = Random.Range(5f, 10f); 
         }
 
     }
-
     private void OnTriggerStay(Collider other)
     {
 
@@ -42,7 +37,7 @@ public class SpinningLineEnd : MonoBehaviour
         if (other.CompareTag("Water"))
         {
             elapsedTime += Time.deltaTime;
-             if (refSpinningRodManager != null)
+            if (refSpinningRodManager != null)
             {
                 if (elapsedTime >= randomTime && !refSpinningRodManager.IsFishHooked)
                 {
@@ -52,7 +47,7 @@ public class SpinningLineEnd : MonoBehaviour
                     iterationCount++;
                     if (iterationCount > 3) iterationCount = 0;
                     randomTime = Random.Range(5f, 10f);
-                }             
+                }
             }
         }
     }

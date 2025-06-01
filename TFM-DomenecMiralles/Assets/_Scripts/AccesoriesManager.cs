@@ -34,8 +34,12 @@ public class AccesoriesManager : MonoBehaviour
     {
         Debug.Log("Changing the end line..");
         GameObject lineEnd = GameObject.Find(_lastSelectedCaneName);
+        if (lineEnd == null)
+        {
+            Debug.LogWarning("Couldn't find the cane!");
+            return;
+        }
         GameObject hooksParent = lineEnd.transform.GetChild(0).gameObject; 
-        if (lineEnd == null) Debug.LogWarning("Couldn't find the cane!");
         
         foreach (Transform child in hooksParent.transform)
         {
@@ -57,7 +61,11 @@ public class AccesoriesManager : MonoBehaviour
     public void ChangeBait(int index)
     {
         GameObject lineEnd = GameObject.Find(_lastSelectedCaneName);
-        if (lineEnd == null) Debug.LogWarning("Couldn't find the cane!");
+        if (lineEnd == null)
+        {
+            Debug.LogWarning("Couldn't find the cane!");
+            return;
+        }
         GameObject baitParent = lineEnd.transform.GetChild(1).gameObject;
 
         foreach (Transform child in baitParent.transform)

@@ -98,7 +98,9 @@ public class UIUnlockManager : MonoBehaviour
 
 
     private int _money;
-    
+
+
+    [SerializeField] private LevelSelector _levelSelector;
 
     private void Start()
     {
@@ -125,7 +127,6 @@ public class UIUnlockManager : MonoBehaviour
 
         betterRodOutline.color = unlocks.fishingRods.betterRod ? Color.green : Color.red;
         betterRodButton.enabled = unlocks.fishingRods.betterRod ? false : true;
-
         spinningRodOutline.color = unlocks.fishingRods.spinningRod ? Color.green : Color.red;
         spinningRodButton.enabled = unlocks.fishingRods.spinningRod ? false : true;
     }
@@ -138,6 +139,8 @@ public class UIUnlockManager : MonoBehaviour
             case "better":
                 if(_money >= betterRodPrice) { 
                 unlockables.fishingRods.betterRod = true;
+                _money -= betterRodPrice;
+                    unlockables.currency = _money;
                 }
                 else
                 {
@@ -149,7 +152,11 @@ public class UIUnlockManager : MonoBehaviour
             case "spinning":
                 if (_money >= spinningRodPrice)
                 {
+                    Debug.Log("Attemtping");
+
                     unlockables.fishingRods.spinningRod = true;
+                    _money -= spinningRodPrice;
+                    unlockables.currency = _money;
                 }
                 else
                 {
@@ -173,8 +180,8 @@ public class UIUnlockManager : MonoBehaviour
         bigHookOutline.color = unlocks.hooks.bighook ? Color.green : Color.red;
         bigHookButton.enabled = unlocks.hooks.bighook ? false : true;
 
-        spinningRodOutline.color = unlocks.hooks.triplehook ? Color.green : Color.red;
-        spinningRodButton.enabled = unlocks.hooks.triplehook ? false : true;
+        tripleHookOutline.color = unlocks.hooks.triplehook ? Color.green : Color.red;
+        tripleHookButton.enabled = unlocks.hooks.triplehook ? false : true;
     }
     public void UnlockHook(string hookname)
     {
@@ -186,6 +193,8 @@ public class UIUnlockManager : MonoBehaviour
                 if (_money >= bigHookPrice)
                 {
                     unlockables.hooks.bighook = true;
+                    _money-= bigHookPrice;
+                    unlockables.currency = _money;
                 }
                 else
                 {
@@ -198,6 +207,9 @@ public class UIUnlockManager : MonoBehaviour
                 if (_money >= TripleHookPrice)
                 {
                     unlockables.hooks.triplehook = true;
+                    _money-= TripleHookPrice;
+                    unlockables.currency = _money;
+
                 }
                 else
                 {
@@ -223,6 +235,8 @@ public class UIUnlockManager : MonoBehaviour
                 if (_money >= mediumBucketPrice)
                 {
                     unlockables.buckets.mediumBucket = true;
+                    _money-= mediumBucketPrice;
+                    unlockables.currency = _money;
                 }
                 else
                 {
@@ -235,6 +249,8 @@ public class UIUnlockManager : MonoBehaviour
                 if (_money >= bigBucketPrice)
                 {
                     unlockables.buckets.largeBucket = true;
+                    _money-= bigBucketPrice;
+                    unlockables.currency = _money;
                 }
                 else
                 {
@@ -283,6 +299,8 @@ public class UIUnlockManager : MonoBehaviour
                 if (_money >= mandarinaPrice)
                 {
                     unlockables.baits.mondarina = true;
+                    _money -= mandarinaPrice;
+                    unlockables.currency = _money;
                 }
                 else
                 {
@@ -295,6 +313,8 @@ public class UIUnlockManager : MonoBehaviour
                 if (_money >= wormPrice)
                 {
                     unlockables.baits.worm = true;
+                    _money -= wormPrice;
+                    unlockables.currency = _money;
                 }
                 else
                 {
@@ -316,7 +336,7 @@ public class UIUnlockManager : MonoBehaviour
         riverLocationOutline.color = unlocks.locations.river ? Color.green : Color.red;
         riverLocationButton.enabled = unlocks.locations.river ? false : true;
 
-        seaLocationOutline.color = unlocks.locations.deepSea ? Color.red : Color.red;
+        seaLocationOutline.color = unlocks.locations.deepSea ? Color.green : Color.red;
         seaLocationButton.enabled = unlocks.locations.deepSea ? false : true;
 
     }
@@ -332,6 +352,8 @@ public class UIUnlockManager : MonoBehaviour
                 if (_money >= riverLocationPrice)
                 {
                     unlockables.locations.river = true;
+                    _money -= riverLocationPrice;
+                    unlockables.currency = _money;
                 }
                 else
                 {
@@ -343,7 +365,9 @@ public class UIUnlockManager : MonoBehaviour
             case "deepsea":
                 if (_money >= seaLocationPrice)
                 {
+                    _money -= seaLocationPrice; 
                     unlockables.locations.deepSea = true;
+                    unlockables.currency = _money;
                 }
                 else
                 {
@@ -356,6 +380,8 @@ public class UIUnlockManager : MonoBehaviour
 
         LoadSaveManager.Instance.SaveProgress(unlockables);
         LoadProgress(); //Refresh the UI
+        //Refresh the door UI
+        _levelSelector.LoadLocationData();
     }
 
     public void ToggleModalVisibility()
